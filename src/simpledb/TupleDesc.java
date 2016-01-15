@@ -5,6 +5,10 @@ import java.util.*;
  * TupleDesc describes the schema of a tuple.
  */
 public class TupleDesc {
+    
+    private Type[] _typeAr;
+    private String[] _fieldAr;
+
 
     /**
      * Merge two TupleDescs into one, with td1.numFields + td2.numFields
@@ -15,12 +19,19 @@ public class TupleDesc {
      * @return the new TupleDesc
      */
     public static TupleDesc combine(TupleDesc td1, TupleDesc td2) {
-        // some code goes here
+        Type[] typeAr = new Type[td1._typeAr.length+td2._typeAr.length];
+        String[] fieldAr = null;
 
+        System.arraycopy(td1._typeAr, 0, typeAr, 0, td1._typeAr.length);
+        System.arraycopy(td2._typeAr, 0, typeAr, td1._typeAr.length, td2._typeAr.length);
 
+        if (td1._fieldAr != null && td2._fieldAr != null){
+            fieldAr = new String[td1._fieldAr.length + td2._fieldAr.length];
+            System.arraycopy(td1._fieldAr, 0, fieldAr, 0, td1._fieldAr.length);
+            System.arraycopy(td2._fieldAr, 0, fieldAr, td1._fieldAr.length, td2._fieldAr.length);
+        }
 
-
-        return null;
+        return new TupleDesc(typeAr, fieldAr);
     }
 
     /**
@@ -32,11 +43,14 @@ public class TupleDesc {
      * @param fieldAr array specifying the names of the fields. Note that names may be null.
      */
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
-        // some code goes here
-
-
-
-
+        _typeAr = new Type[typeAr.length];
+        _typeAr = Arrays.copyOf(typeAr, typeAr.length);
+        if (fieldAr!=null){
+            _fieldAr = new String[fieldAr.length];
+            _fieldAr = Arrays.copyOf(fieldAr, fieldAr.length);
+        }else{
+            _fieldAr = null;
+        }
     }
 
     /**
@@ -48,19 +62,16 @@ public class TupleDesc {
      *        this TupleDesc. It must contain at least one entry.
      */
     public TupleDesc(Type[] typeAr) {
-        // some code goes here
+        _typeAr = new Type[typeAr.length];
+        _typeAr = Arrays.copyOf(typeAr, typeAr.length);
+        _fieldAr = null;
     }
 
     /**
      * @return the number of fields in this TupleDesc
      */
     public int numFields() {
-        // some code goes here
-
-
-
-
-        return 0;
+        return _typeAr.length;
     }
 
     /**
@@ -71,11 +82,11 @@ public class TupleDesc {
      * @throws NoSuchElementException if i is not a valid field reference.
      */
     public String getFieldName(int i) throws NoSuchElementException {
-        // some code goes here
-
-
-
-        return null;
+        if (_fieldAr!=null){
+            return _fieldAr[i];
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -86,11 +97,14 @@ public class TupleDesc {
      * @throws NoSuchElementException if no field with a matching name is found.
      */
     public int nameToId(String name) throws NoSuchElementException {
-        // some code goes here
-
-
-
-        return 0;
+        if (_fieldAr!=null){
+            for (int i=0; i<_fieldAr.length; i++){
+                if (_fieldAr[i].equals(name)){
+                    return i;
+                }
+            }
+        }
+        throw new NoSuchElementException();
     }
 
     /**
@@ -101,11 +115,7 @@ public class TupleDesc {
      * @throws NoSuchElementException if i is not a valid field reference.
      */
     public Type getType(int i) throws NoSuchElementException {
-        // some code goes here
-
-
-
-        return null;
+        return _typeAr[i];
     }
 
     /**
@@ -113,12 +123,11 @@ public class TupleDesc {
      * Note that tuples from a given TupleDesc are of a fixed size.
      */
     public int getSize() {
-        // some code goes here
-
-
-
-
-        return 0;
+        int size = 0;
+        for (Type t: _typeAr){
+            size += t.getLen();
+        }
+        return size;
     }
 
     /**
@@ -130,11 +139,17 @@ public class TupleDesc {
      * @return true if the object is equal to this TupleDesc.
      */
     public boolean equals(Object o) {
-        // some code goes here
+        if (!(o instanceof TupleDesc))
+            return false;
 
-
-
-        return false;
+        TupleDesc that = (TupleDesc) o;
+        if (_typeAr.length != that._typeAr.length)
+            return false;
+        for (int i = 0; i < _typeAr.length; i++) {
+            if (_typeAr[i] != that._typeAr[i])
+                return false;
+        }
+        return true;
     }
 
     public int hashCode() {
@@ -150,10 +165,15 @@ public class TupleDesc {
      * @return String describing this descriptor.
      */
     public String toString() {
-        // some code goes here
+        StringBuilder desString = new StringBuilder();
 
-
-        
-        return "";
+        for (int i=0; i<_typeAr.length; i++) {
+            desString.append(_typeAr.toString());
+            if (_fieldAr!=null)
+                desString.append('(').append(_fieldAr[i]).append(')');
+            if (i<_typeAr.length-1)
+                desString.append(',');
+        }
+        return desString.toString();
     }
 }
