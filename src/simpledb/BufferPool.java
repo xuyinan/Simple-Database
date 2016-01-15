@@ -1,6 +1,7 @@
 package simpledb;
 
 import java.io.*;
+import java.util.*;
 /**
  * BufferPool manages the reading and writing of pages into memory from
  * disk. Access methods call into it to retrieve pages, and it fetches
@@ -19,13 +20,17 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
+    private int _numPages;
+    private HashMap<PageId, Page> _id_page;
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-        // some code goes here
+        _numPages = numPages;
+        _id_page = new HashMap<PageId, Page>();
     }
 
     /**
@@ -44,9 +49,24 @@ public class BufferPool {
      * @param perm the requested permissions on the page
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
-        throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+            throws TransactionAbortedException, DbException {
+
+        if (perm.permLevel==0 || perm.permLevel==1){
+            Page page = _id_page.get(pid);
+            if (page!=null){
+                return page;
+            }else{
+                if (_id_page.size()>=_numPages){}
+                    throw new DbException("Too Many Pages.");
+                }else{
+                    Page newPage = Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid);
+                    _id_page.put(pid, newPage);
+                    return newPage;
+                }
+            }
+        }else{
+            throw new DbException("No Permission.");
+        }
     }
 
     /**
