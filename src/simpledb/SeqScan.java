@@ -8,6 +8,9 @@ import java.util.*;
  */
 public class SeqScan implements DbIterator {
 
+    private HeapFile _hf;
+    private DbFileIterator _dbIt;
+
     /**
      * Creates a sequential scan over the specified table as a part of the
      * specified transaction.
@@ -21,12 +24,12 @@ public class SeqScan implements DbIterator {
      *         name can be null.fieldName, tableAlias.null, or null.null).
      */
     public SeqScan(TransactionId tid, int tableid, String tableAlias) {
-        // some code goes here
+        _hf = (HeapFile) Database.getCatalog().getDbFile(tableid);
+        _dbIt = _hf.iterator(tid);
     }
 
-    public void open()
-        throws DbException, TransactionAbortedException {
-        // some code goes here
+    public void open() throws DbException, TransactionAbortedException {
+        _dbIt.open();
     }
 
     /**
@@ -36,27 +39,25 @@ public class SeqScan implements DbIterator {
      * prefixed with the tableAlias string from the constructor.
      */
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+        return _hf.getTupleDesc();
     }
 
     public boolean hasNext() throws TransactionAbortedException, DbException {
         // some code goes here
-        return false;
+        return _dbIt.hasNext();
     }
 
     public Tuple next()
         throws NoSuchElementException, TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        return _dbIt.next();
     }
 
     public void close() {
-        // some code goes here
+        _dbIt.close();
     }
 
     public void rewind()
         throws DbException, NoSuchElementException, TransactionAbortedException {
-        // some code goes here
+        _dbIt.rewind();
     }
 }
